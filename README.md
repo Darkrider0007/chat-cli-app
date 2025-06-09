@@ -1,4 +1,3 @@
-```markdown
 # 💬 CLI Chat Application
 
 A simple, real-time command-line chat application using **Node.js** and **Socket.IO**, where users can join using a custom `chatcli://` link.
@@ -25,7 +24,6 @@ A simple, real-time command-line chat application using **Node.js** and **Socket
 
 ## 🗂 Folder Structure
 
-
 chat-cli-app/
 ├── bin/
 │   └── chatcli.js        # Executable CLI chat command
@@ -35,7 +33,6 @@ chat-cli-app/
 │   └── index.js          # Socket.IO server
 ├── package.json
 └── README.md
-
 
 ---
 
