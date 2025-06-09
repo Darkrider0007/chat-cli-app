@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Chat App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --bg: #f9fafb;
+            --text: #111827;
+        }
+
+        body {
+            font-family: "Segoe UI", sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        h2 {
+            margin-top: 20px;
+            color: var(--primary);
+        }
+
+        #container {
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+        }
+
+        #chat {
+            border: 1px solid #ccc;
+            background: white;
+            padding: 10px;
+            height: 300px;
+            overflow-y: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 10px;
+        }
+
+        .msg {
+            margin-bottom: 10px;
+        }
+
+        .timestamp {
+            color: gray;
+            font-size: 0.75rem;
+            margin-left: 5px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        #chatSection {
+            margin-top: 20px;
+        }
+
+        @media (max-width: 600px) {
+            #container {
+                padding: 10px;
+            }
+
+            #chat {
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h2>🗨️ Chat Room</h2>
+    <div id="container">
+        <div id="joinSection">
+            <input id="username" type="text" placeholder="Enter your name" />
+            <button onclick="joinChat()">Join Chat</button>
+        </div>
+
+        <div id="chatSection" style="display: none;">
+            <div id="chat"></div>
+            <input id="message" type="text" placeholder="Type a message..." onkeypress="handleKey(event)" />
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <audio id="notifySound" src="https://notificationsounds.com/storage/sounds/file-sounds-1155-pristine.mp3"
+        preload="auto"></audio>
+
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script>
+        let socket;
+        let username = "";
+
+        function joinChat() {
+            username = document.getElementById("username").value.trim();
+            if (!username) return alert("Enter a name");
+
+            socket = io();
+            socket.emit("join", username);
+            document.getElementById("joinSection").style.display = "none";
+            document.getElementById("chatSection").style.display = "block";
+
+            socket.on("chat message", (msgObj) => {
+                const chat = document.getElementById("chat");
+                const el = document.createElement("div");
+                el.className = "msg";
+                el.innerHTML = `<strong>${msgObj.user}</strong>: ${msgObj.message} <span class="timestamp">${msgObj.time}</span>`;
+                chat.appendChild(el);
+                chat.scrollTop = chat.scrollHeight;
+
+                // Play notification sound if not your message
+                if (msgObj.user !== username) {
+                    document.getElementById("notifySound").play().catch(() => { });
+                }
+            });
+        }
+
+        function sendMessage() {
+            const msgInput = document.getElementById("message");
+            const msg = msgInput.value.trim();
+            if (msg && socket) {
+                socket.emit("chat message", msg);
+                msgInput.value = "";
+            }
+        }
+
+        function handleKey(event) {
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+        }
+    </script>
+</body>
+
+</html>
